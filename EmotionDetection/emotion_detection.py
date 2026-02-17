@@ -2,6 +2,7 @@
 Emotion detecting module
 '''
 
+import json
 import requests
 
 def emotion_detector(text_to_analyze):
@@ -15,4 +16,12 @@ def emotion_detector(text_to_analyze):
     headers = {"grpc-metadata-mm-model-id": "emotion_aggregated-workflow_lang_en_stock"}
     myobj = { "raw_document": { "text": text_to_analyze } }
     res = requests.post(url, headers=headers, json=myobj, timeout=2000)
-    return res.text
+    emotions = json.loads(res.text)["emotionPredictions"][0]["emotion"]
+    max_score = 0
+    dominant_emotion = ""
+    for emotion, score in emotions.items():
+        if max_score < score:
+            max_score = score
+            dominant_emotion = emotion
+    emotions["dominant_emotion"] = dominant_emotion
+    return emotions
